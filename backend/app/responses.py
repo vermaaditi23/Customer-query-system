@@ -103,6 +103,12 @@ TEMPLATES = {
         "Order {order_id} was cancelled. Payment status: {payment_status} (via {payment_method}). "
         "Any refund due goes back to the original payment method.",
     ],
+        "refund_howto": [
+        "To get a refund, first check that your order is delivered and its items are returnable "
+        "(ask me \"Can I return my order?\"). Then raise a support ticket with the order ID. "
+        "Approved refunds go back to the original payment method. "
+        "You can also ask me for your payment status.",
+    ],
     "order_details": ["Order {order_id} ({status}), total {total}:\n{lines}"],
     "my_orders": ["Here are your most recent orders:\n{lines}"],
     "ticket": [
@@ -111,6 +117,7 @@ TEMPLATES = {
     "my_tickets": ["Here are your support tickets:\n{lines}"],
     "product": [
         "{name}: {price}. Warranty: {warranty}. Returnable: {returnable}.",
+        
     ],
 }
 

@@ -4,13 +4,17 @@ from app import tools
 from app.nlu import classifier, entities
 from app.redact import redact
 from app.llm import answer_general, rephrase_answer
+import re
+REFUND_HOWTO_RE = re.compile(
+    r"\bhow\b.*\brefunds?\b|\brefunds?\b.*\b(process|policy|work|take|long)\b|\bget (a |my )?refund")
 
 ORDER_INTENTS = {"order_status", "track_order", "delivery_date", "cancel_order",
                  "return_eligibility", "warranty", "payment_refund", "order_details"}
 
 
-def _pack(intent, text):
-    text = rephrase_answer(text)
+def _pack(intent, text, polish=True):
+    if polish:
+        text = rephrase_answer(text)
     return {"reply": redact(text), "intent": intent,
             "suggestions": R.SUGGESTIONS.get(intent, R.SUGGESTIONS["help"])}
 
@@ -106,8 +110,8 @@ def answer(conn, customer_id, first_name, message):
     if intent in ("fallback", "out_of_scope"):
         text = answer_general(message)
         if text:
-            return _pack("fallback", text)
-        return _pack("fallback", R.pick("fallback"))
+            return _pack("fallback", text, polish=False)
+        return _pack("fallback", R.pick("fallback"), polish=False)
 
     ents = entities.extract(message, entities.load_products(conn))
 
