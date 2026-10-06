@@ -7,3 +7,4 @@ backend/static/
 *.db
 .env
 .pytest_cache/
+*.env

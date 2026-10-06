@@ -3,12 +3,14 @@ from app import responses as R
 from app import tools
 from app.nlu import classifier, entities
 from app.redact import redact
+from app.llm import answer_general, rephrase_answer
 
 ORDER_INTENTS = {"order_status", "track_order", "delivery_date", "cancel_order",
                  "return_eligibility", "warranty", "payment_refund", "order_details"}
 
 
 def _pack(intent, text):
+    text = rephrase_answer(text)
     return {"reply": redact(text), "intent": intent,
             "suggestions": R.SUGGESTIONS.get(intent, R.SUGGESTIONS["help"])}
 
@@ -96,12 +98,15 @@ def answer(conn, customer_id, first_name, message):
     intent, _conf = classifier.classify(message)
 
     if intent == "sensitive_request":
-        return _pack("sensitive_request", R.pick("sensitive"))
+                return _pack("sensitive_request", R.pick("sensitive"), polish=False)
     if intent == "greeting":
-        return _pack("greeting", R.pick("greeting", first_name=first_name or "there"))
+                return _pack("greeting", R.pick("greeting", first_name=first_name or "there"), polish=False)
     if intent == "help":
-        return _pack("help", R.pick("help"))
+                return _pack("help", R.pick("help"), polish=False)
     if intent in ("fallback", "out_of_scope"):
+        text = answer_general(message)
+        if text:
+            return _pack("fallback", text)
         return _pack("fallback", R.pick("fallback"))
 
     ents = entities.extract(message, entities.load_products(conn))
